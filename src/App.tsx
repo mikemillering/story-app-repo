@@ -1,159 +1,147 @@
 import { useState, useEffect } from "react";
 import DrawButtons from "./components/DrawButtons";
-import PlayerDisplay from "./components/PlayerDisplay";
+//import PlayerDisplay from "./components/PlayerDisplay";
 import "./Index.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import PlayerDisplay from "./components/PlayerDisplay";
 
 function App() {
   const [deck, setDeck] = useState<string[]>([]);
   const [playerHand, setPlayerHand] = useState<string[]>([]);
   const [playerHandValue, setPlayerHandValue] = useState(0);
+  const [playerScore, setPlayerScore] = useState(0);
   const [dealerHand, setDealerHand] = useState<string[]>([]);
   const [dealerHandValue, setDealerHandValue] = useState(0);
+  const [dealerScore, setDealerScore] = useState(0);
   const [message, setMessage] = useState("Welcome To BlackJack!");
 
   useEffect(() => {
-    initializeDeck();
+    setDeck(shuffledDeck());
   }, []);
 
-  useEffect(() => {
-    dealerHandValue === 0 ? dealerDrawTwo : null;
-  }, [playerHand]);
-
   const suits = ["Hearts", "Clubs", "Spades", "Diamonds"];
-  const values = {
-    Ace: 1,
-    King: 10,
-    Queen: 10,
-    Jack: 10,
-    "10": 10,
-    "9": 9,
-    "8": 8,
-    "7": 7,
-    "6": 6,
-    "5": 5,
-    "4": 4,
-    "3": 3,
-    "2": 2,
-  };
+  const values = [
+    "Ace",
+    "King",
+    "Queen",
+    "Jack",
+    "10",
+    "9",
+    "8",
+    "7",
+    "6",
+    "5",
+    "4",
+    "3",
+    "2",
+  ];
 
-  {
-    /* Dealer Function */
+  let buildDeck = suits.flatMap((suit) =>
+    values.map((card) => `${card} of ${suit}`)
+  );
+
+  function shuffledDeck() {
+    let shuffledDeck = buildDeck.sort(() => Math.random() - 0.5);
+    return shuffledDeck;
   }
 
-  const dealerDraw = () => {
-    let randNum = Math.floor(Math.random() * deck.length);
-    const newDeck = [...deck];
-    const newCard = newDeck[randNum];
-    const newCardValue = values[newCard.split(" ")[0]];
-    setDealerHandValue((prev) => prev + newCardValue);
-    if (playerHandValue + newCardValue > 21) {
-      setDealerHand([...playerHand, newCard]);
-      setMessage(
-        `Dealer Busted! They ended up with ${dealerHandValue + newCardValue}`
-      );
-    } else {
-      setDealerHand([...playerHand, newCard]);
-      newDeck.splice(randNum, 1);
-      setDeck([...newDeck]);
-    }
-  };
-
-  const dealerDrawTwo = () => {
-    let randNumOne = Math.floor(Math.random() * deck.length);
-    let randNumTwo = Math.floor(Math.random() * (deck.length - 1));
-    if (randNumTwo >= randNumOne) randNumTwo++;
-    const newDeck = [...deck];
-    const newCardOne = newDeck[randNumOne];
-    const newCardTwo = newDeck[randNumTwo];
-    const totalCardValue =
-      values[newCardOne.split(" ")[0]] + values[newCardTwo.split(" ")[0]];
-    setDealerHandValue((prev) => prev + totalCardValue);
-    setDealerHand([...dealerHand, newCardOne, newCardTwo]);
-    newDeck.splice(randNumOne, 1);
-    newDeck.splice(randNumTwo < randNumOne ? randNumTwo : randNumTwo - 1, 1);
-    setDeck([...newDeck]);
-  };
-
-  {
-    /* Player Functions */
+  function test() {
+    draw(setPlayerHand, setPlayerHandValue);
   }
 
-  const draw = () => {
-    let randNum = Math.floor(Math.random() * deck.length);
-    const newDeck = [...deck];
-    const newCard = newDeck[randNum];
-    const newCardValue = values[newCard.split(" ")[0]];
-    setPlayerHandValue((prev) => prev + newCardValue);
-    if (playerHandValue + newCardValue > 21) {
-      setPlayerHand([...playerHand, newCard]);
-      setMessage(`You Busted! You are at ${playerHandValue + newCardValue}`);
-    } else {
-      setPlayerHand([...playerHand, newCard]);
-      newDeck.splice(randNum, 1);
-      setDeck([...newDeck]);
-    }
-  };
-
-  const drawTwo = () => {
-    let randNumOne = Math.floor(Math.random() * deck.length);
-    let randNumTwo = Math.floor(Math.random() * (deck.length - 1));
-    if (randNumTwo >= randNumOne) randNumTwo++;
-    const newDeck = [...deck];
-    const newCardOne = newDeck[randNumOne];
-    const newCardTwo = newDeck[randNumTwo];
-    const totalCardValue =
-      values[newCardOne.split(" ")[0]] + values[newCardTwo.split(" ")[0]];
-    setPlayerHandValue((prev) => prev + totalCardValue);
-    setPlayerHand([...playerHand, newCardOne, newCardTwo]);
-    newDeck.splice(randNumOne, 1);
-    newDeck.splice(randNumTwo < randNumOne ? randNumTwo : randNumTwo - 1, 1);
-    setDeck([...newDeck]);
-  };
-
-  {
-    /* Other Functions */
+  function testTwo() {
+    draw(setDealerHand, setDealerHandValue);
   }
 
-  const initializeDeck = () => {
-    const getDeck: { [key: string]: number } = [];
-    for (const suit of suits) {
-      for (const value in values) {
-        const cardName = `${value} of ${suit}`;
-        getDeck.push(cardName);
-      }
+  function dealCards() {
+    let tempDeck = [...deck];
+    for (let i = 0; i < 4; i++) {
+      setTimeout(() => {
+        if (i % 2 === 0) {
+          let newCard = tempDeck.splice(i, 1)[0];
+          setPlayerHand((prev) => [...prev, newCard]);
+          let cardValue = getValue(newCard);
+          setPlayerHandValue((prev) => prev + cardValue);
+          setDeck([...tempDeck]);
+        } else {
+          let newCard = tempDeck.splice(i, 1)[0];
+          setDealerHand((prev) => [...prev, newCard]);
+          let cardValue = getValue(newCard);
+          setDealerHandValue((prev) => prev + cardValue);
+          setDeck([...tempDeck]);
+        }
+      }, i * 300);
     }
-    setDeck(getDeck);
-  };
+  }
 
-  const stay = () => {
-    if (dealerHandValue < 15) {
-      do {
-        dealerDraw();
-        //setDealerHandValue((prev) => prev + 1);
-      } while (dealerHandValue > 17);
-    } else {
-      getNewHand();
+  function draw(setHand, setHandValue) {
+    let tempDeck = [...deck];
+    let newCard = tempDeck.splice(0, 1)[0];
+    setHand((prev) => [...prev, newCard]);
+    let cardValue = getValue(newCard);
+    setHandValue((prev) => prev + cardValue);
+    setDeck([...tempDeck]);
+    console.log(deck);
+  }
+
+  function getValue(card) {
+    let value = 0;
+    let firstOfCard = card.slice(0, 1);
+    switch (firstOfCard) {
+      case "A":
+        value = 1;
+        break;
+      case "9":
+        value = 9;
+        break;
+      case "8":
+        value = 8;
+        break;
+      case "7":
+        value = 7;
+        break;
+      case "6":
+        value = 6;
+        break;
+      case "5":
+        value = 5;
+        break;
+      case "4":
+        value = 4;
+        break;
+      case "3":
+        value = 3;
+        break;
+      case "2":
+        value = 2;
+        break;
+      default:
+        value = 10;
     }
-  };
+    return value;
+  }
 
-  const getNewHand = () => {
-    setPlayerHand([]);
-    setPlayerHandValue(0);
-    setDealerHand([]);
-    setDealerHandValue(0);
-    initializeDeck();
-    setMessage("Welcome To BlackJack!");
-  };
+  function dealerDrawUp() {
+    while (
+      dealerHandValue <= playerHandValue &&
+      playerHandValue <= 21 &&
+      dealerHandValue <= 18
+    ) {
+      setTimeout(() => {}
+      draw(setDealerHand, setDealerHandValue);
+    }, 1000)
+    }
+  }
 
   return (
     <div className="wrapper">
       <div className="container dark">
         <div className="row">
-          {" "}
+          <div>Your Score: {playerScore}</div>
+          <div className="container">Dealer Score: {dealerScore}</div>
           <div className="col-6 offset-3">
             <div className="message-container">
-              <p>{message}</p>
+              <p>{playerScore}</p>
             </div>
           </div>
           <div className="col-3 offset-3">
@@ -169,14 +157,7 @@ function App() {
         </div>
         <div className="row">
           <div className="col-2">
-            <DrawButtons
-              draw={draw}
-              drawTwo={drawTwo}
-              getNewHand={getNewHand}
-              handValue={playerHandValue}
-              dealerDrawTwo={dealerDrawTwo}
-              stay={stay}
-            />
+            <DrawButtons test={test} testTwo={testTwo} />
           </div>
           <div className="col-3 offset-1">
             <div className="card-container player-display">
@@ -189,10 +170,13 @@ function App() {
               <PlayerDisplay hand={dealerHand} />
             </div>
           </div>
+          <button className="btn" onClick={dealCards}>
+            deal
+          </button>
+          <button className="btn" onClick={dealerDrawUp}>
+            dealer draw
+          </button>
         </div>
-        <button className="btn btn-dark" onClick={dealerDrawTwo}>
-          Dealer Hand
-        </button>
       </div>
     </div>
   );
