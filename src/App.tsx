@@ -14,6 +14,7 @@ function App() {
   const [dealerHandValue, setDealerHandValue] = useState(0);
   const [dealerScore, setDealerScore] = useState(0);
   const [message, setMessage] = useState("Welcome To BlackJack!");
+  const [buttonCondition, setButtonCondition] = useState(0);
 
   useEffect(() => {
     setDeck(shuffledDeck());
@@ -45,15 +46,15 @@ function App() {
     return shuffledDeck;
   }
 
-  function test() {
+  function playerDraw() {
     draw(setPlayerHand, setPlayerHandValue);
   }
 
-  function testTwo() {
+  function dealerDraw() {
     draw(setDealerHand, setDealerHandValue);
   }
 
-  function dealCards() {
+  function deal() {
     let tempDeck = [...deck];
     for (let i = 0; i < 4; i++) {
       setTimeout(() => {
@@ -72,6 +73,7 @@ function App() {
         }
       }, i * 300);
     }
+    setButtonCondition((prev) => prev + 1);
   }
 
   function draw(setHand, setHandValue) {
@@ -81,7 +83,12 @@ function App() {
     let cardValue = getValue(newCard);
     setHandValue((prev) => prev + cardValue);
     setDeck([...tempDeck]);
-    console.log(deck);
+    if (handValue > 21) {
+      stay();
+      endRound();
+    } else {
+      null;
+    }
   }
 
   function getValue(card) {
@@ -121,16 +128,27 @@ function App() {
     return value;
   }
 
-  function dealerDrawUp() {
-    while (
-      dealerHandValue <= playerHandValue &&
-      playerHandValue <= 21 &&
-      dealerHandValue <= 18
-    ) {
-      setTimeout(() => {}
-      draw(setDealerHand, setDealerHandValue);
-    }, 1000)
+  function stay() {
+    if (dealerHandValue > playerHandValue) {
+      setMessage("you lose");
+      setDealerScore((prev) => prev + 1);
+    } else {
+      setMessage("you win");
+      setPlayerScore((prev) => prev + 1);
     }
+    endRound();
+  }
+
+  function endRound() {
+    setTimeout(() => {
+      setPlayerHand([]);
+      setDealerHand([]);
+      setPlayerHandValue(0);
+      setDealerHandValue(0);
+      setDeck(shuffledDeck());
+      setButtonCondition((prev) => prev - 1);
+      setMessage("BlackJack");
+    }, 1500);
   }
 
   return (
@@ -141,7 +159,7 @@ function App() {
           <div className="container">Dealer Score: {dealerScore}</div>
           <div className="col-6 offset-3">
             <div className="message-container">
-              <p>{playerScore}</p>
+              <p>{message}</p>
             </div>
           </div>
           <div className="col-3 offset-3">
@@ -157,7 +175,12 @@ function App() {
         </div>
         <div className="row">
           <div className="col-2">
-            <DrawButtons test={test} testTwo={testTwo} />
+            <DrawButtons
+              playerDraw={playerDraw}
+              deal={deal}
+              stay={stay}
+              buttonCondition={buttonCondition}
+            />
           </div>
           <div className="col-3 offset-1">
             <div className="card-container player-display">
@@ -170,12 +193,6 @@ function App() {
               <PlayerDisplay hand={dealerHand} />
             </div>
           </div>
-          <button className="btn" onClick={dealCards}>
-            deal
-          </button>
-          <button className="btn" onClick={dealerDrawUp}>
-            dealer draw
-          </button>
         </div>
       </div>
     </div>
