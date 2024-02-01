@@ -7,21 +7,20 @@ export default function buttonFunction(props: any) {
       <div className="container">
         {props.buttonCondition === 0 ? (
           <div className="row">
-            <button className="btn btn-info btn-lg" onClick={props.deal}>
+            <button className="btn btn-primary btn-lg p-5" onClick={props.deal}>
               DEAL
             </button>
           </div>
         ) : (
           <div className="row">
-            <div className="col-">
-              <button
-                className="btn btn-success btn-lg"
-                onClick={props.playerDraw}
-              >
-                Hit
-              </button>
-            </div>
-            <button className="btn btn-danger btn-lg" onClick={props.stay}>
+            <button
+              className="btn btn-success btn-lg p-5"
+              onClick={props.playerDraw}
+            >
+              Hit
+            </button>
+
+            <button className="btn btn-danger btn-lg mt-3" onClick={props.stay}>
               Stay
             </button>
           </div>

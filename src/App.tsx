@@ -47,13 +47,16 @@ function App() {
   }
 
   function playerDraw() {
-    draw(setPlayerHand, setPlayerHandValue);
+    draw(setPlayerHand, setPlayerHandValue, playerHandValue);
   }
 
+  {
+    /*
   function dealerDraw() {
-    draw(setDealerHand, setDealerHandValue);
+    draw(setDealerHand, setDealerHandValue, dealerHandValue);
   }
-
+*/
+  }
   function deal() {
     let tempDeck = [...deck];
     for (let i = 0; i < 4; i++) {
@@ -73,21 +76,20 @@ function App() {
         }
       }, i * 300);
     }
-    setButtonCondition((prev) => prev + 1);
+    setButtonCondition(1);
   }
 
-  function draw(setHand, setHandValue) {
+  function draw(setHand, setHandValue, handValue) {
     let tempDeck = [...deck];
     let newCard = tempDeck.splice(0, 1)[0];
     setHand((prev) => [...prev, newCard]);
     let cardValue = getValue(newCard);
     setHandValue((prev) => prev + cardValue);
     setDeck([...tempDeck]);
-    if (handValue > 21) {
-      stay();
+    if (handValue + cardValue > 21) {
+      setMessage("Dealer Wins");
+      setDealerScore((prev) => prev + 1);
       endRound();
-    } else {
-      null;
     }
   }
 
@@ -129,12 +131,12 @@ function App() {
   }
 
   function stay() {
-    if (dealerHandValue > playerHandValue) {
-      setMessage("you lose");
-      setDealerScore((prev) => prev + 1);
-    } else {
-      setMessage("you win");
+    if (dealerHandValue < playerHandValue && playerHandValue <= 21) {
+      setMessage("You Win");
       setPlayerScore((prev) => prev + 1);
+    } else {
+      setMessage("Dealer Wins");
+      setDealerScore((prev) => prev + 1);
     }
     endRound();
   }
@@ -146,8 +148,8 @@ function App() {
       setPlayerHandValue(0);
       setDealerHandValue(0);
       setDeck(shuffledDeck());
-      setButtonCondition((prev) => prev - 1);
       setMessage("BlackJack");
+      deal();
     }, 1500);
   }
 
@@ -155,8 +157,8 @@ function App() {
     <div className="wrapper">
       <div className="container dark">
         <div className="row">
-          <div>Your Score: {playerScore}</div>
-          <div className="container">Dealer Score: {dealerScore}</div>
+          <div className="light-text">Your Score: {playerScore}</div>
+          <div className="light-text">Dealer Score: {dealerScore}</div>
           <div className="col-6 offset-3">
             <div className="message-container">
               <p>{message}</p>
@@ -193,6 +195,7 @@ function App() {
               <PlayerDisplay hand={dealerHand} />
             </div>
           </div>
+          <button className="btn">New Game</button>
         </div>
       </div>
     </div>
